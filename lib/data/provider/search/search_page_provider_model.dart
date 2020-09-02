@@ -1,7 +1,7 @@
 import 'package:async/async.dart';
 import 'package:passat/data/api/api_exception.dart';
 import 'package:passat/data/models/search_result/search_result_page_list_item_model.dart';
-import 'package:passat/data/provider/search_page_provider_model_state.dart';
+import 'package:passat/data/provider/search/search_page_provider_model_state.dart';
 import 'package:passat/data/repositories/search_locations_rest_repository.dart';
 import 'package:passat/domain/entities/location.dart';
 import 'package:passat/domain/provider/provider_model.dart';
@@ -22,10 +22,11 @@ class SearchPageProviderModel
   Future<void> searchLocations(String query) {
     final searchResult = _searchLocationsRepository.search(query);
 
-    return value.listModel.set(_builder(searchResult), notifyListeners);
+    return value.listModel
+        .set(_resultTransformBuilder(searchResult), notifyListeners);
   }
 
-  Future<Result<List<SearchResultPageListItemModel>>> _builder(
+  Future<Result<List<SearchResultPageListItemModel>>> _resultTransformBuilder(
           Future<Result<List<Location>>> future) =>
       future.then((Result<List<Location>> value) {
         if (value.isValue) {

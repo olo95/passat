@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:passat/app/navigation.dart';
 import 'package:passat/data/app_colors.dart';
-import 'package:passat/data/provider/search_page_provider_model.dart';
+import 'package:passat/data/provider/search/search_page_provider_model.dart';
 import 'package:passat/domain/provider/provider_model_async_result.dart';
 import 'package:provider/provider.dart';
 
@@ -20,8 +20,6 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchLocationTextFieldController =
       TextEditingController(text: '');
-
-  Future<void> locationsState;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -44,7 +42,8 @@ class _SearchPageState extends State<SearchPage> {
       );
 
   Widget _textField() => TextField(
-        decoration: InputDecoration(border: OutlineInputBorder(), hintText: 'Type in location'),
+        decoration: InputDecoration(
+            border: OutlineInputBorder(), hintText: 'Type in location'),
         textAlign: TextAlign.center,
         controller: _searchLocationTextFieldController,
       );

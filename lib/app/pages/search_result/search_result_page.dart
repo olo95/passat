@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:passat/app/navigation.dart';
 import 'package:passat/data/models/search_result/search_result_page_list_item_model.dart';
 
 class SearchResultPage extends StatelessWidget {
@@ -15,7 +16,11 @@ class SearchResultPage extends StatelessWidget {
           itemCount: _listDataSource.length,
           itemBuilder: (BuildContext context, int index) => Material(
             child: InkWell(
-              onTap: () {},
+              onTap: () {
+                Future.microtask(() => Navigation.of(context)
+                    .getToLocationForecastPage(
+                        context, _listDataSource[index].id));
+              },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
