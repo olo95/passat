@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'location.g.dart';
+part '../../domain/entities/location.g.dart';
 
 @JsonSerializable()
 class Location {
@@ -13,7 +13,7 @@ class Location {
   String locationType;
 
   @JsonKey()
-  String woeid;
+  int woeid;
 
   @JsonKey(name: 'latt_long')
   String lattLong;

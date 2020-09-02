@@ -13,11 +13,11 @@ class HttpClient {
 
   factory HttpClient() => _instance;
 
-  Future<Result<dynamic>> getRequest(String path) async {
+  Future<Result<dynamic>> getRequest(Uri uri) async {
     Response response;
 
     try {
-      response = await get(path);
+      response = await get(uri);
       final statusCode = response.statusCode;
 
       if (statusCode >= 200 && statusCode < 299) {

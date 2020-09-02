@@ -1,7 +1,7 @@
 abstract class ApiPaths {
-  static const String _basePath = 'https://www.metaweather.com/api/location';
+  static const String authority = 'www.metaweather.com';
 
-  static const String search = _basePath + '/search';
+  static const String search = '/api/location/search';
 
-  static const String location = _basePath;
+  static const String location = '/api/location';
 }

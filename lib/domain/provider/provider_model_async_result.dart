@@ -2,19 +2,22 @@ import 'dart:ui';
 
 import 'package:async/async.dart';
 
+enum ProviderModelAsyncResultState { none, active, done }
+
 class ProviderModelAsyncResult<T> {
   Future<void> set(
       Future<Result<T>> futureResult, VoidCallback isLoadingChanged) async {
-    _isLoading = true;
+    _state = ProviderModelAsyncResultState.active;
+    isLoadingChanged();
 
     result = await futureResult;
 
-    _isLoading = false;
+    _state = ProviderModelAsyncResultState.done;
     isLoadingChanged();
   }
 
-  bool get hasData => !_isLoading || result != null;
-
   Result<T> result;
-  bool _isLoading = false;
+  ProviderModelAsyncResultState _state = ProviderModelAsyncResultState.none;
+
+  ProviderModelAsyncResultState get state => _state;
 }
