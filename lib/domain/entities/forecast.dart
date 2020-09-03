@@ -36,8 +36,8 @@ class Forecast {
   @JsonKey()
   DateTime created;
 
-  @JsonKey(name: 'applicable_date')
-  String applicableDate;
+  @JsonKey(name: 'applicable_date', fromJson: fromJsonToLocal)
+  DateTime applicableDate;
 
   @JsonKey(name: 'min_temp')
   double minTemp;
@@ -70,4 +70,7 @@ class Forecast {
       _$ForecastFromJson(json);
 
   Map<String, dynamic> toJson() => _$ForecastToJson(this);
+
+  static DateTime fromJsonToLocal(String date) =>
+      date != null ? DateTime.parse(date).toLocal() : null;
 }

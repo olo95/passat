@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of '../../domain/entities/location.dart';
+part of 'location.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

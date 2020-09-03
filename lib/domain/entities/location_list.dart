@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:passat/domain/entities/location.dart';
 
-part '../../domain/entities/location_list.g.dart';
+part 'location_list.g.dart';
 
 @JsonSerializable()
 class LocationList {
