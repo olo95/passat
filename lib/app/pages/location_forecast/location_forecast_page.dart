@@ -35,8 +35,48 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
       LocationForecastProviderModel providerModel) {
     final locationForecast = providerModel.value.forecastModel;
 
-    if (locationForecast.state == ProviderModelAsyncResultState.done &&
-        locationForecast.result.isError) {
+    if (locationForecast.state == ProviderModelAsyncResultState.done) {
+      _showLoadingError(contentContext);
+    }
+
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: (() => Provider.of<LocationForecastProviderModel>(
+                contentContext,
+                listen: false)
+            .getForecast()),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints viewportConstraints) =>
+              SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxHeight: viewportConstraints.maxHeight),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _selectedWeather(locationForecast),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    Container(
+                        height: 150, child: _weatherList(locationForecast))
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        title: _appBarTitle(locationForecast),
+      ),
+    );
+  }
+
+  Future _showLoadingError(BuildContext nestedContext) =>
       Future.microtask(() => showCupertinoDialog(
           context: context,
           builder: (BuildContext context) => CupertinoAlertDialog(
@@ -50,7 +90,7 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
                   ),
                   CupertinoDialogAction(
                     onPressed: () {
-                      Provider.of<LocationForecastProviderModel>(contentContext,
+                      Provider.of<LocationForecastProviderModel>(nestedContext,
                               listen: false)
                           .getForecast();
 
@@ -60,49 +100,6 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
                   )
                 ],
               )));
-    }
-
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: (() {
-          return Provider.of<LocationForecastProviderModel>(contentContext,
-                  listen: false)
-              .getForecast();
-        }),
-        child: OrientationBuilder(
-          builder: (BuildContext context, Orientation orientation) =>
-              LayoutBuilder(
-            builder:
-                (BuildContext context, BoxConstraints viewportConstraints) =>
-                    SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints:
-                    BoxConstraints(maxHeight: viewportConstraints.maxHeight),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _selectedWeather(locationForecast),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Container(
-                          height: 150, child: _weatherList(locationForecast))
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      appBar: AppBar(
-        title: _appBarTitle(locationForecast),
-      ),
-    );
-  }
 
   Widget _appBarTitle(ProviderModelAsyncResult<LocationForecastModel> model) {
     switch (model.state) {

@@ -79,34 +79,27 @@ class _SearchPageState extends State<SearchPage> {
       case ProviderModelAsyncResultState.done:
         if (listModel.result.isValue) {
           if (listModel.result.asValue.value.isEmpty) {
-            Future.microtask(() => showCupertinoDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) => CupertinoAlertDialog(
-                      title: Text('No results!'),
-                    )));
+            showErrorAlert('No results!');
           } else {
             Future.microtask(() => Navigation.of(context).getToSearchResultPage(
                 context, listModel.result.asValue.value));
           }
         } else if (listModel.result.isError) {
-          Future.microtask(() => showCupertinoDialog(
-              barrierDismissible: true,
-              context: context,
-              builder: (BuildContext context) => CupertinoAlertDialog(
-                    title: Text('No results!'),
-                  )));
+          showErrorAlert('No results!');
         } else {
-          Future.microtask(() => showCupertinoDialog(
-              barrierDismissible: true,
-              context: context,
-              builder: (BuildContext context) => CupertinoAlertDialog(
-                    title: Text('Something went wrong'),
-                  )));
+          showErrorAlert('Something went wrong');
         }
         break;
     }
 
     return Text('SEARCH');
   }
+
+  Future showErrorAlert(String title) =>
+      Future.microtask(() => showCupertinoDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (BuildContext context) => CupertinoAlertDialog(
+                title: Text(title),
+              )));
 }
