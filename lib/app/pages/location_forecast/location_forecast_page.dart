@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:passat/app/navigation.dart';
 import 'package:passat/data/models/location_forecast/location_forecast_list_item_model.dart';
 import 'package:passat/data/models/location_forecast/location_forecast_model.dart';
 import 'package:passat/data/provider/location_forecast/location_forecast_provider_model.dart';
@@ -17,33 +19,44 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
 
   @override
   void didChangeDependencies() {
-    modelState ??=
-        Provider.of<LocationForecastProviderModel>(context, listen: true)
-            .getForecast();
+    Future.microtask(() => modelState ??=
+        Provider.of<LocationForecastProviderModel>(context, listen: false)
+            .getForecast());
 
     super.didChangeDependencies();
   }
 
   @override
-  Widget build(BuildContext context) => _content(context);
+  Widget build(BuildContext context) => Consumer<LocationForecastProviderModel>(
+      builder: (context, providerModel, child) =>
+          _content(context, providerModel));
 
-  Widget _content(BuildContext context) {
-    final locationForecast = context.select(
-        (LocationForecastProviderModel model) => model.value.forecastModel);
+  Widget _content(BuildContext contentContext,
+      LocationForecastProviderModel providerModel) {
+    final locationForecast = providerModel.value.forecastModel;
 
-    if (locationForecast.result.isError) {
+    if (locationForecast.state == ProviderModelAsyncResultState.done &&
+        locationForecast.result.isError) {
       Future.microtask(() => showCupertinoDialog(
           context: context,
           builder: (BuildContext context) => CupertinoAlertDialog(
                 title: Text('Failed to download forecast'),
                 actions: [
-                  InkWell(
-                    child: Text('Retry'),
-                    onTap: () {
-                      Provider.of<LocationForecastProviderModel>(context,
+                  CupertinoDialogAction(
+                    onPressed: () {
+                      Navigation.of(context)..pop(context)..pop(context);
+                    },
+                    child: Text('Go back'),
+                  ),
+                  CupertinoDialogAction(
+                    onPressed: () {
+                      Provider.of<LocationForecastProviderModel>(contentContext,
                               listen: false)
                           .getForecast();
+
+                      Navigation.of(context).pop(context);
                     },
+                    child: Text('Retry'),
                   )
                 ],
               )));
@@ -52,23 +65,34 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: (() {
-          return Provider.of<LocationForecastProviderModel>(context,
+          return Provider.of<LocationForecastProviderModel>(contentContext,
                   listen: false)
               .getForecast();
         }),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints viewportConstraints) =>
-              SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxHeight: viewportConstraints.maxHeight),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _selectedWeather(locationForecast),
-                  Container(height: 150, child: _weatherList(locationForecast))
-                ],
+        child: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) =>
+              LayoutBuilder(
+            builder:
+                (BuildContext context, BoxConstraints viewportConstraints) =>
+                    SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxHeight: viewportConstraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _selectedWeather(locationForecast),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Container(
+                          height: 150, child: _weatherList(locationForecast))
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -101,9 +125,13 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
     switch (model.state) {
       case ProviderModelAsyncResultState.none:
       case ProviderModelAsyncResultState.active:
-        return shimmeringContainer();
+        return Expanded(child: shimmeringContainer());
         break;
       case ProviderModelAsyncResultState.done:
+        if (!model.result.isValue) {
+          return shimmeringContainer();
+        }
+
         final value = model.result.asValue.value;
         final itemModel = value.listItemModelList.firstWhere(
             (element) => element.id == value.selectedWeatherId,
@@ -136,12 +164,13 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
     switch (model.state) {
       case ProviderModelAsyncResultState.none:
       case ProviderModelAsyncResultState.active:
-        return Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: shimmeringContainer(),
-        );
+        return shimmeringContainer();
         break;
       case ProviderModelAsyncResultState.done:
+        if (!model.result.isValue) {
+          return shimmeringContainer();
+        }
+
         return _weatherListContent(
             model.result.asValue.value.listItemModelList);
         break;
@@ -181,16 +210,13 @@ class _LocationForecastPageState extends State<LocationForecastPage> {
             );
           });
 
-  Widget shimmeringContainer() => Flexible(
-        fit: FlexFit.tight,
-        child: Container(
-          color: Colors.grey.withAlpha(50),
-          child: Shimmer.fromColors(
-            baseColor: Colors.white70,
-            highlightColor: Colors.grey,
-            child: Container(
-              color: Colors.white24,
-            ),
+  Widget shimmeringContainer() => Container(
+        color: Colors.grey.withAlpha(50),
+        child: Shimmer.fromColors(
+          baseColor: Colors.white70,
+          highlightColor: Colors.grey,
+          child: Container(
+            color: Colors.white24,
           ),
         ),
       );

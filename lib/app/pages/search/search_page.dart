@@ -90,9 +90,19 @@ class _SearchPageState extends State<SearchPage> {
                 context, listModel.result.asValue.value));
           }
         } else if (listModel.result.isError) {
-          return Text('ERROR');
+          Future.microtask(() => showCupertinoDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) => CupertinoAlertDialog(
+                    title: Text('No results!'),
+                  )));
         } else {
-          return Text('UNKNOWN ERROR');
+          Future.microtask(() => showCupertinoDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) => CupertinoAlertDialog(
+                    title: Text('Something went wrong'),
+                  )));
         }
         break;
     }
